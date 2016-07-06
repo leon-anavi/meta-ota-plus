@@ -1,0 +1,26 @@
+
+echo
+
+LOCATION=tmp/deploy/images/qemux86-64/
+
+echo Running image from $LOCATION
+KERNEL=$LOCATION/bzImage
+ROOTFS=$LOCATION/agl-ota-plus-qemux86-64.ext4
+echo
+
+# qemu doesn't like running images from NFS. Adding the -snapshot option
+# fixes it, at the expense of not saving changes make to the image
+
+sudo qemu-system-x86_64  \
+  -kernel $KERNEL \
+  -hda $ROOTFS \
+  -snapshot \
+	-m 1G \
+	-usb \
+  -append "root=/dev/hda" \
+	-usbdevice tablet \
+	-show-cursor \
+	-vga std \
+	-net user,hostfwd=tcp:127.0.0.1:2222-:22 \
+	-net nic \
+	-cpu Haswell -enable-kvm
