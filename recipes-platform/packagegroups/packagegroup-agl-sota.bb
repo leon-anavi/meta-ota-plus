@@ -10,6 +10,7 @@ PACKAGES = " packagegroup-agl-sota "
 ALLOW_EMPTY_${PN} = "1"
 
 RDEPENDS_${PN} += "\
-    rvi-sota-client \
+    ota-plus-client \
+    ota-plus-demo-provision \
     ostree \
 "
