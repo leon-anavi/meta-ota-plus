@@ -13,12 +13,14 @@ do_install_append() {
  fi
 }
 
-pkg_postinst_${PN} () {
-#!/bin/sh -e
 # Swith to Weston IVI shell
-mv /etc/xdg/weston/weston.ini /etc/xdg/weston/weston.ini.desktop-shell
-cp /opt/AGL/CES2016/weston.ini.ivi-shell /etc/xdg/weston/
-ln -sf /etc/xdg/weston/weston.ini.ivi-shell /etc/xdg/weston/weston.ini
+python __anonymous () {
+    postinst = '#!/bin/sh\n'
+    if bb.utils.contains('DISTRO_FEATURES', 'ota-plus-apps', True, False, d):
+        postinst += 'mv /etc/xdg/weston/weston.ini /etc/xdg/weston/weston.ini.desktop-shell\n'
+        postinst += 'cp /opt/AGL/CES2016/weston.ini.ivi-shell /etc/xdg/weston/\n'
+        postinst += 'ln -sf /etc/xdg/weston/weston.ini.ivi-shell /etc/xdg/weston/weston.ini\n'
+    d.setVar('pkg_postinst_${PN}', postinst)
 }
 
 FILES_${PN} += " \
