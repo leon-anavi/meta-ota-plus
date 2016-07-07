@@ -1,6 +1,8 @@
+SRC_URI = "git://github.com/openivimobility/CES2016.git;protocol=ssh;branch=qemu"
+SRCREV = "6ac449529a2907967374540970c8fd705879f64a"
+
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 SRC_URI += "\
-    file://change-resolution.patch \
     ${@bb.utils.contains('DISTRO_FEATURES', 'ota-plus-apps-update', 'file://0001-TopBar.qml-Change-the-first-icon.patch', '', d)} \
     "
 
