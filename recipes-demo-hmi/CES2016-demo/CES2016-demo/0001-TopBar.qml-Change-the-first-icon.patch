@@ -1,0 +1,29 @@
+From 4f1ac5d780957d771d965fea184ffce6483f4047 Mon Sep 17 00:00:00 2001
+From: Leon Anavi <leon.anavi@konsulko.com>
+Date: Thu, 7 Jul 2016 17:46:47 +0300
+Subject: [PATCH] TopBar.qml: Change the first icon
+
+Replace browser with cameras on the first button
+of the top bar.
+
+Signed-off-by: Leon Anavi <leon.anavi@konsulko.com>
+---
+ TopBar.qml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/TopBar.qml b/TopBar.qml
+index 7f6feb8..3abf159 100644
+--- a/TopBar.qml
++++ b/TopBar.qml
+@@ -81,7 +81,7 @@ void main(void) {
+ 
+         Repeater {
+             model: ListModel {
+-                ListElement { name: "browser" }
++                ListElement { name: "cameras" }
+                 ListElement { name: "dashboard" }
+                 ListElement { name: "hvac" }
+                 ListElement { name: "weather" }
+-- 
+2.7.4
+

@@ -1,5 +1,8 @@
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
-SRC_URI += "file://change-resolution.patch"
+SRC_URI += "\
+    file://change-resolution.patch \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'ota-plus-apps-update', 'file://0001-TopBar.qml-Change-the-first-icon.patch', '', d)} \
+    "
 
 inherit systemd
 
