@@ -22,5 +22,5 @@ sudo qemu-system-x86_64  \
 	-show-cursor \
 	-vga std \
 	-net user,hostfwd=tcp:127.0.0.1:2222-:22 \
-	-net nic \
+	-net nic,macaddr=52:54:00:12:31:68 \
 	-cpu Haswell -enable-kvm
