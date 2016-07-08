@@ -1,7 +1,10 @@
 SRC_URI = "git://github.com/openivimobility/CES2016.git;protocol=ssh;branch=qemu"
-S = "${WORKDIR}/git"
-
 SRCREV = "6ac449529a2907967374540970c8fd705879f64a"
+
+FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
+SRC_URI += "\
+    ${@bb.utils.contains('DISTRO_FEATURES', 'ota-plus-apps-update', 'file://0001-TopBar.qml-Change-the-first-icon.patch', '', d)} \
+    "
 
 inherit systemd
 
@@ -15,12 +18,14 @@ do_install_append() {
  fi
 }
 
-pkg_postinst_${PN} () {
-#!/bin/sh -e
 # Swith to Weston IVI shell
-mv /etc/xdg/weston/weston.ini /etc/xdg/weston/weston.ini.desktop-shell
-cp /opt/AGL/CES2016/weston.ini.ivi-shell /etc/xdg/weston/
-ln -sf /etc/xdg/weston/weston.ini.ivi-shell /etc/xdg/weston/weston.ini
+python __anonymous () {
+    postinst = '#!/bin/sh\n'
+    if bb.utils.contains('DISTRO_FEATURES', 'ota-plus-apps', True, False, d):
+        postinst += 'mv /etc/xdg/weston/weston.ini /etc/xdg/weston/weston.ini.desktop-shell\n'
+        postinst += 'cp /opt/AGL/CES2016/weston.ini.ivi-shell /etc/xdg/weston/\n'
+        postinst += 'ln -sf /etc/xdg/weston/weston.ini.ivi-shell /etc/xdg/weston/weston.ini\n'
+    d.setVar('pkg_postinst_${PN}', postinst)
 }
 
 FILES_${PN} += " \
