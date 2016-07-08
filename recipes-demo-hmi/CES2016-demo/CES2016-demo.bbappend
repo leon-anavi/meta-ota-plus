@@ -1,5 +1,7 @@
-FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
-SRC_URI += "file://change-resolution.patch"
+SRC_URI = "git://github.com/openivimobility/CES2016.git;protocol=ssh;branch=qemu"
+S = "${WORKDIR}/git"
+
+SRCREV = "6ac449529a2907967374540970c8fd705879f64a"
 
 inherit systemd
 
