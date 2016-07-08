@@ -15,7 +15,7 @@ sudo qemu-system-x86_64  \
   -kernel $KERNEL \
   -hda $ROOTFS \
   -snapshot \
-	-m 1G \
+	-m 2G \
 	-usb \
   -append "root=/dev/hda" \
 	-usbdevice tablet \
