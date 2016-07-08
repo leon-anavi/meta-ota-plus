@@ -2,6 +2,7 @@
 
 import argparse
 import base64
+from binascii import unhexlify
 import os
 from os import listdir
 from os.path import exists, join
@@ -40,7 +41,8 @@ class OtaPlusUpdate(object):
 
     @staticmethod
     def parse_from_filename(packagename, filename):
-        re_updates = re.compile("^" + packagename + "-delta(\\d+)-([^\\-]+)-([^\\-\\.]+)\\.tar.gz$")
+        re_updates = re.compile("^" + packagename +
+                                "-delta(\\d+)-([^\\-]+)-([^\\-\\.]+)\\.tar.gz$")
         m = re_updates.match(filename)
         if m:
             delta_num = int(m.group(1))
@@ -63,7 +65,6 @@ class UpdateOutputDirectory(object):
     def _latest_update(self):
         best = None
         for path in listdir(self._path):
-            print "checking %s" % path
             up = OtaPlusUpdate.parse_from_filename(self._packagename, path)
             if up:
                 if not best:
@@ -90,30 +91,30 @@ class UpdateOutputDirectory(object):
         else:
             from_sha = 'empty'
             delta_num = 0
-        filename = '%s-delta%d-%s-%s.tar.gz' % (packagename, delta_num, from_sha,
-                                            to_sha)
+        filename = '%s-delta%d-%s-%s.tar.gz' % (packagename, delta_num,
+                                                from_sha, to_sha)
         return join(self._path, filename)
 
-def hexstring_to_binstring(hexst):
-    ret = ""
-    while(hexst):
-        num = hexst[:2]
-        hexst = hexst[2:]
-        ret += chr(int(num, 16))
-    return ret
 
-def delta_folder_name(from_sha, to_sha):
-    from_bin = hexstring_to_binstring(from_sha)
-    to_bin = hexstring_to_binstring(to_sha)
+def hex_to_ostree(sha):
+    '''
+    Convert a sha hash in hex format to the b64 format that OSTree uses for
+    static delta name
+    '''
+    binary = unhexlify(sha)
+    encoded = base64.b64encode(binary).rstrip("=").translate(string.maketrans('/', '_'))
+    return encoded
 
-    from_b64 = base64.b64encode(from_bin).rstrip("=").translate(string.maketrans('/', '_'))
-    to_b64 = base64.b64encode(to_bin).rstrip("=").translate(string.maketrans('/', '_'))
-
-    if from_b64:
-        namestr = from_b64 + "-" + to_b64
+def delta_file_name(from_sha, to_sha):
+    '''
+    Return the path that OSTree will use for a static delta between a pair of
+    hashes
+    '''
+    if from_sha:
+        namestr = hex_to_ostree(from_sha) + '-' + hex_to_ostree(to_sha)
     else:
-        namestr = to_b64
-
+        namestr = hex_to_ostree(to_sha)
+    namestr += "/superblock"
     return namestr[:2] + "/" + namestr[2:]
 
 class UpdateMetaData(object):
@@ -161,10 +162,6 @@ def main():
     outputdirectory = UpdateOutputDirectory(packagename=args.packagename,
                                             path=args.output)
 
-    #deltaprefix = args.packagename.translate(string.maketrans('/\\', '__'))
-    #delta_num, delta_from, delta_to = find_last_delta(args.output,
-    #                                                  deltaprefix)
-
     if not exists(args.repo):
         os.makedirs(args.repo)
         subprocess.check_call(["ostree", "--repo="+args.repo, "init", "--mode=archive-z2"])
@@ -179,13 +176,16 @@ def main():
     if not args.small:
         # generate static delta
         cmd = ["ostree", "--repo="+args.repo, "static-delta", "generate",
-               '--empty', '--to='+to, "--inline", "--min-fallback-size=65536"]
+               '--to='+to, "--inline", "--min-fallback-size=65536"]
 
         if delta_from:
             cmd.append('--from='+delta_from)
         else:
             cmd.append('--empty')
         subprocess.check_call(cmd)
+        delta_file = join(args.repo, 'deltas', delta_file_name(delta_from, to))
+        print "delta file should be at %s" % delta_file
+        assert exists(delta_file)
         #deltafolder = delta_folder_name("" if (delta_num < 0) else delta_to, to)
 
     #shutil.copytree(args.repo+"/deltas/"+deltafolder[:2], tarfolder + "/" + deltafolder[:2])
@@ -208,7 +208,7 @@ def main():
         tarinfo.size = len(metafile)
         outputtar.addfile(tarinfo, StringIO(metafile))
         if not args.small:
-            print "TODO: include static delta"
+            outputtar.add(delta_file)
     print "Generated %s" % outputfilename
 
 if __name__ == "__main__":
