@@ -13,4 +13,5 @@ RDEPENDS_${PN} += "\
     ota-plus-client \
     ota-plus-demo-provision \
     ostree \
+    ostree-basic-pkg \
 "
