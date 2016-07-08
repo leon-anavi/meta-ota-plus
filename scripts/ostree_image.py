@@ -28,11 +28,11 @@ def find_last_delta(path, prefix):
     return (maxdelta, fr, to)
 
 def hexstring_to_binstring(hexst):
-    ret = "" 
+    ret = ""
     while(hexst):
         num = hexst[:2]
         hexst = hexst[2:]
-	ret += chr(int(num, 16))
+        ret += chr(int(num, 16))
     return ret
 
 def delta_folder_name(from_sha, to_sha):
@@ -48,7 +48,7 @@ def delta_folder_name(from_sha, to_sha):
         namestr = to_b64
 
     return namestr[:2] + "/" + namestr[2:]
-    
+
 def main(argc, argv):
     argc -= 1
     argi = 1
@@ -64,7 +64,7 @@ def main(argc, argv):
     parser.add_argument('-u', '--union', required=True, help="If the package overwrites files in install path. Should be \"true\" or \"false\"")
     parser.add_argument('-m', '--message', required=True, help="Commit message")
     args = parser.parse_args()
-    
+
     if(os.path.exists(args.tree)):
         shutil.rmtree(args.tree)
     os.makedirs(args.tree)
@@ -72,23 +72,23 @@ def main(argc, argv):
     subprocess.check_call(["tar", "xf", args.image, "-C", args.tree])
 
     if(not os.path.exists(args.repo)):
-	os.makedirs(args.repo)
+        os.makedirs(args.repo)
         subprocess.check_call(["ostree", "--repo="+args.repo, "init", "--mode=archive-z2"])
 
     if(not os.path.exists(args.deltasdir)):
-	os.makedirs(args.deltasdir)
+        os.makedirs(args.deltasdir)
 
     deltaprefix = args.packagename.translate(string.maketrans('/\\', '__'))
 
     delta_num, delta_from, delta_to = find_last_delta(args.deltasdir, deltaprefix)
 
-    # commit    
-    to = subprocess.check_output(["ostree", "--repo="+args.repo, "commit", '--subject=\"'+args.message+"\"", '--branch='+args.packagename, "--tree=dir="+args.tree]).strip() 
+    # commit
+    to = subprocess.check_output(["ostree", "--repo="+args.repo, "commit", '--subject=\"'+args.message+"\"", '--branch='+args.packagename, "--tree=dir="+args.tree]).strip()
     # generate static delta
     if(delta_num < 0):
-        subprocess.check_call(["ostree", "--repo="+args.repo, "static-delta", "generate", '--empty', '--to='+to, "--inline", "--min-fallback-size=65536"]) 
+        subprocess.check_call(["ostree", "--repo="+args.repo, "static-delta", "generate", '--empty', '--to='+to, "--inline", "--min-fallback-size=65536"])
     else:
-        subprocess.check_call(["ostree", "--repo="+args.repo, "static-delta", "generate", '--from='+delta_to, '--to='+to, "--inline", "--min-fallback-size=65536"]) 
+        subprocess.check_call(["ostree", "--repo="+args.repo, "static-delta", "generate", '--from='+delta_to, '--to='+to, "--inline", "--min-fallback-size=65536"])
 
     deltafolder = delta_folder_name("" if (delta_num < 0) else delta_to, to)
 
@@ -115,5 +115,6 @@ def main(argc, argv):
 
 
 if __name__ == "__main__":
-    main(len(sys.argv), sys.argv)        	
+    main(len(sys.argv), sys.argv)
 
+# vim: set expandtab tabstop=4 shiftwidth=4:
