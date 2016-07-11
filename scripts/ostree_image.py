@@ -1,4 +1,16 @@
 #!/usr/bin/python
+# pylint: disable=C0301
+
+'''
+Tool to create software updates based on OSTree
+
+# Testing
+
+Run the unit tests with:
+
+    python -m unittest tests
+'''
+
 
 import argparse
 import base64
@@ -135,8 +147,19 @@ class UpdateMetaData(object):
         res = ""
         for field_name in self.fields:
             python_name = field_name.lower()
-            res += "%s=%s\n" % (field_name, self.__dict__[python_name])
+            value = self._pickle_value(self.__dict__[python_name])
+            res += "%s=%s\n" % (field_name, value)
         return res
+    @staticmethod
+    def _pickle_value(value):
+        '''
+        Convert a value to a string to store in the metadate file
+        '''
+        if isinstance(value, bool):
+            # ostree-basic-pkg uses 'true' not 'True'
+            return str(value).lower()
+        else:
+            return str(value)
 
 def main():
     parser = argparse.ArgumentParser()

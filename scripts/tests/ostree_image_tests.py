@@ -24,7 +24,7 @@ class UpdateMetaDataTest(TestCase):
         CONFIG_VERSION=1.0
         CONFIG_DELTA_TO=asdfasdfas
         CONFIG_PATH=/
-        CONFIG_UNION=True
+        CONFIG_UNION=true
         CONFIG_DELTA_FROM=
         '''
         self.assertEqual(dedent(golden), res)
