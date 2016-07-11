@@ -8,6 +8,8 @@ S = "${WORKDIR}/git"
 
 SRCREV = "${AUTOREV}"
 
+PV = "1.0+${SRCPV}"
+
 inherit systemd
 
 PR="4"
