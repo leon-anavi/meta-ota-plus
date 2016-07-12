@@ -199,7 +199,7 @@ def main():
     if not args.small:
         # generate static delta
         cmd = ["ostree", "--repo="+args.repo, "static-delta", "generate",
-               '--to='+to, "--inline", "--min-fallback-size=65536"]
+               '--to='+to, "--inline", "--min-fallback-size=65536", "--disable-bsdiff"]
 
         if delta_from:
             cmd.append('--from='+delta_from)
